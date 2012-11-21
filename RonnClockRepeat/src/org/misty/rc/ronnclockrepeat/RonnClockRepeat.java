@@ -23,7 +23,7 @@ public class RonnClockRepeat extends AppWidgetProvider {
 		Log.d(TAG, "onReceive");
 		super.onReceive(context, intent);
 		
-		// 更新用のアクションの場合
+		// アクション文字列が該当する場合
 		if(intent.getAction().equals(ACTION_REPEAT)) {
 			ComponentName cn = new ComponentName(context, RonnClockRepeat.class);
 			RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.keyguard);
@@ -42,16 +42,19 @@ public class RonnClockRepeat extends AppWidgetProvider {
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 		Log.d(TAG, "onUpdate");
 		
-		for(int i = 0; i < appWidgetIds.length; i++) {
+		for(int appWidgetId: appWidgetIds) {
 			Intent intent = new Intent(context, RonnClockRepeat.class);
+			// Action文字列をセット
 			intent.setAction(ACTION_REPEAT);
-			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetIds[i]);
+			// 今回は使わないがServiceなどで一意のIDを取得したい場合はセットしておくと便利
+			intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
 			
+			// 一意のIDをrequestCodeに渡さないとWidgetを特定できない
+			// referenceの"currently not used"はウソっぽい
 			PendingIntent operation = PendingIntent.getBroadcast(
-					context, appWidgetIds[i], intent, PendingIntent.FLAG_UPDATE_CURRENT);
+					context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			
 			AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-			
 			am.setRepeating(AlarmManager.RTC, 0, INTERVAL, operation);
 		}
 	}
